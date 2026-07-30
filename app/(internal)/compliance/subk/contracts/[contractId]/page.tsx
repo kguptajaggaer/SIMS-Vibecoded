@@ -148,16 +148,16 @@ export default function SubkContractDetail() {
     const updates: Record<string, unknown> = { status: nextStatus, updated_at: now };
 
     if (cycle.status === "ready_for_co_review") {
-      updates.co_reviewed_by = user.name;
+      updates.co_reviewed_by = user.id;
       updates.co_reviewed_at = now;
       updates.co_comments = reviewComment || null;
       if (approve) updates.supplier_status = "supplier_reported";
     } else if (cycle.status === "ready_for_portfolio_review") {
-      updates.portfolio_reviewed_by = user.name;
+      updates.portfolio_reviewed_by = user.id;
       updates.portfolio_reviewed_at = now;
       updates.portfolio_comments = reviewComment || null;
     } else if (cycle.status === "ready_for_diversity_review") {
-      updates.diversity_reviewed_by = user.name;
+      updates.diversity_reviewed_by = user.id;
       updates.diversity_reviewed_at = now;
       updates.diversity_comments = reviewComment || null;
     }
