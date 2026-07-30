@@ -19,9 +19,9 @@ function navLinkStyle(pathname: string, href: string): React.CSSProperties {
     color: active ? "#ffffff" : "#c8d9ec",
     textDecoration: active ? "underline" : "none",
     textUnderlineOffset: "3px",
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: active ? "600" : "500",
-    padding: "4px 6px",
+    padding: "4px 8px",
     borderRadius: "4px",
     whiteSpace: "nowrap" as const,
     cursor: "pointer",
@@ -88,15 +88,15 @@ export default function InternalLayout({ children }: { children: React.ReactNode
       <header
         style={{
           backgroundColor: "#004B87",
-          height: "48px",
+          height: "52px",
           display: "flex",
           alignItems: "center",
-          padding: "0 20px",
+          padding: "0 16px",
           boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
           position: "sticky",
           top: 0,
           zIndex: 100,
-          gap: "14px",
+          gap: "8px",
           overflow: "visible",
         }}
       >
@@ -105,7 +105,7 @@ export default function InternalLayout({ children }: { children: React.ReactNode
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "10px",
+            gap: "6px",
             flexShrink: 0,
           }}
         >
@@ -122,13 +122,13 @@ export default function InternalLayout({ children }: { children: React.ReactNode
           <span
             style={{
               color: "#c8d9ec",
-              fontSize: "11px",
+              fontSize: "10px",
               fontWeight: "400",
               letterSpacing: "0.02em",
               whiteSpace: "nowrap",
             }}
           >
-            Supplier Information Management System
+            USPS
           </span>
         </div>
 
@@ -147,9 +147,10 @@ export default function InternalLayout({ children }: { children: React.ReactNode
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "2px",
+            gap: "1px",
             flex: 1,
             minWidth: 0,
+            overflow: "visible",
           }}
         >
           {/* Home */}
@@ -372,7 +373,7 @@ export default function InternalLayout({ children }: { children: React.ReactNode
 
           {/* User Guides & Help Links */}
           <Link href="/help" style={navLinkStyle(pathname, "/help")}>
-            User Guides &amp; Help Links
+            Help
           </Link>
         </nav>
 
