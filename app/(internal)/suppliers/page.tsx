@@ -96,6 +96,9 @@ export default function SuppliersPage() {
   const [deleteName, setDeleteName] = useState("");
   const [deleting, setDeleting] = useState(false);
 
+  // Invite flow
+  const [invitingId, setInvitingId] = useState<string | null>(null);
+
   // ── Data fetching ────────────────────────────────────────────────────────
 
   async function loadSuppliers() {
@@ -256,16 +259,61 @@ export default function SuppliersPage() {
         return;
       }
     } else {
-      const { error } = await supabase.from("suppliers").insert([payload]);
+      const { data: inserted, error } = await supabase
+        .from("suppliers")
+        .insert([payload])
+        .select()
+        .single();
       if (error) {
         setFormError(error.message);
         setSaving(false);
+        return;
+      }
+      // Auto-send invite email if email is provided
+      if (inserted && (form as any).email?.trim()) {
+        setSaving(false);
+        closeModal();
+        loadSuppliers();
+        await sendInvite(inserted as Supplier, false);
         return;
       }
     }
 
     setSaving(false);
     closeModal();
+    loadSuppliers();
+  }
+
+  // ── Invite ───────────────────────────────────────────────────────────────
+
+  async function sendInvite(supplier: Supplier, isResend = false) {
+    const email = (supplier as any).email;
+    if (!email) {
+      setPageError(`No email on file for ${supplier.name}. Edit the supplier and add an email first.`);
+      return;
+    }
+    setInvitingId(supplier.id);
+    try {
+      const res = await fetch("/api/email/supplier-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          supplierId: supplier.id,
+          supplierName: supplier.name,
+          email,
+          isResend,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPageError("");
+      } else {
+        setPageError(`Failed to send invite: ${data.error ?? "Unknown error"}`);
+      }
+    } catch {
+      setPageError("Network error sending invite.");
+    }
+    setInvitingId(null);
     loadSuppliers();
   }
 
@@ -468,6 +516,15 @@ export default function SuppliersPage() {
                         onClick={() => openEdit(s)}
                       >
                         Edit
+                      </button>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => sendInvite(s, true)}
+                        disabled={invitingId === s.id}
+                        title={(s as any).email ? `Send invite to ${(s as any).email}` : "Add email first"}
+                        style={{ opacity: (s as any).email ? 1 : 0.45 }}
+                      >
+                        {invitingId === s.id ? "Sending…" : "✉ Invite"}
                       </button>
                       <button
                         className="btn btn-danger btn-sm"

@@ -171,6 +171,25 @@ export default function SubkContractDetail() {
       setMsg({ type: "error", text: "Failed to update cycle status." });
     } else {
       setMsg({ type: "success", text: approve ? "Cycle approved." : "Cycle returned for revision." });
+      // Fire status-change notification email (best-effort — don't block UI)
+      if (contract) {
+        fetch("/api/email/contract-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contractId,
+            contractNumber: contract.contract_number,
+            supplierName: contract.supplier_name,
+            supplierEmail: (contract as any).supplier_contact_email ?? (contract as any).supplier_email ?? "",
+            contractOfficer: contract.contract_officer,
+            contractOfficerEmail: contract.contract_officer_email ?? "",
+            newStatus: nextStatus,
+            oldStatus: cycle.status,
+            rejectionReason: approve ? "" : reviewComment,
+            contractModule: "subk",
+          }),
+        }).catch(() => {});
+      }
       setReviewTarget(null);
       setReviewComment("");
       await loadData();

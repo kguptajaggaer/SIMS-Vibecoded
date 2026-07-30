@@ -101,6 +101,24 @@ export default function EppContractDetail() {
       setMsg({ type: "error", text: "Failed to update EPP status." });
     } else {
       setMsg({ type: "success", text: approve ? "Approved." : "Returned to supplier." });
+      // Fire status-change notification (best-effort)
+      if (contract) {
+        fetch("/api/email/contract-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contractId,
+            contractNumber: contract.contract_number,
+            supplierName: contract.supplier_name,
+            supplierEmail: (contract as any).supplier_contact_email ?? "",
+            contractOfficer: contract.contract_officer,
+            contractOfficerEmail: contract.contract_officer_email ?? "",
+            newStatus: nextStatus,
+            oldStatus: currentStatus,
+            contractModule: "epp",
+          }),
+        }).catch(() => {});
+      }
       await loadData();
     }
     void roleName;
