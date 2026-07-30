@@ -19,6 +19,15 @@ interface EppCycleRow {
   eppCycle: EppContractCycle | null;
 }
 
+interface Attachment {
+  id: string;
+  slot_number: number;
+  file_name: string;
+  file_url: string;
+  description?: string;
+  file_size?: number;
+}
+
 export default function EppContractDetail() {
   const { contractId } = useParams<{ contractId: string }>();
   const [user, setUser] = useState<User | null>(null);
@@ -29,6 +38,7 @@ export default function EppContractDetail() {
   const [showAddCycle, setShowAddCycle] = useState(false);
   const [cycleForm, setCycleForm] = useState({ name: "", fiscal_year: "", start_date: "", end_date: "", goals: "" });
   const [savingCycle, setSavingCycle] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   useEffect(() => {
     const u = getUser();
@@ -57,6 +67,12 @@ export default function EppContractDetail() {
       rows.push({ cycle, eppCycle });
     }
     setCycleRows(rows);
+    const { data: docs } = await supabase
+      .from("contract_documents")
+      .select("*")
+      .eq("contract_id", contractId)
+      .order("slot_number", { ascending: true });
+    setAttachments((docs as Attachment[]) || []);
     setLoading(false);
   }
 
@@ -307,6 +323,35 @@ export default function EppContractDetail() {
           </div>
         )}
       </div>
+
+      {/* Attachments */}
+      {attachments.length > 0 && (
+        <div className="card" style={{ marginTop: 16 }}>
+          <div className="card-header">
+            <h2 className="card-title">Documents & Attachments ({attachments.length})</h2>
+          </div>
+          <div className="card-body">
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {attachments.map((doc) => (
+                <div key={doc.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", border: "1px solid var(--border)", borderRadius: 6, background: "#fafbfc" }}>
+                  <div style={{ fontSize: 20, lineHeight: 1 }}>📎</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>{doc.description || doc.file_name}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                      {doc.file_name}{doc.file_size && <> · {(doc.file_size / 1024).toFixed(1)} KB</>}
+                    </div>
+                  </div>
+                  {doc.file_url && (
+                    <a href={doc.file_url} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ whiteSpace: "nowrap" }}>
+                      Download
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -60,12 +60,15 @@ const DIVERSITY_OPTIONS = [
 
 const BLANK_FORM = {
   name: "",
+  dba_name: "",
   apex_number: "",
   address: "",
   city: "",
   state: "",
   zip: "",
   website: "",
+  email: "",
+  phone: "",
   status: "prospective" as SupplierStatus,
   is_diverse: false,
   diversity_classifications: [] as string[],
@@ -180,12 +183,15 @@ export default function SuppliersPage() {
     setEditTarget(s);
     setForm({
       name: s.name,
+      dba_name: s.dba_name ?? "",
       apex_number: s.apex_number ?? "",
       address: s.address ?? "",
       city: s.city ?? "",
       state: s.state ?? "",
       zip: s.zip ?? "",
       website: s.website ?? "",
+      email: (s as any).email ?? "",
+      phone: (s as any).phone ?? "",
       status: s.status,
       is_diverse: s.is_diverse,
       diversity_classifications: s.diversity_classifications ?? [],
@@ -223,12 +229,15 @@ export default function SuppliersPage() {
 
     const payload = {
       name: form.name.trim(),
+      dba_name: (form as any).dba_name?.trim() || null,
       apex_number: form.apex_number.trim() || null,
       address: form.address.trim() || null,
       city: form.city.trim() || null,
       state: form.state.trim() || null,
       zip: form.zip.trim() || null,
       website: form.website.trim() || null,
+      email: (form as any).email?.trim() || null,
+      phone: (form as any).phone?.trim() || null,
       status: form.status,
       is_diverse: form.is_diverse,
       diversity_classifications: form.diversity_classifications,
@@ -378,6 +387,7 @@ export default function SuppliersPage() {
               <tr>
                 <th>Supplier Name</th>
                 <th>APEX Number</th>
+                <th>Email</th>
                 <th>City / State</th>
                 <th>Status</th>
                 <th>Diverse</th>
@@ -410,6 +420,11 @@ export default function SuppliersPage() {
                   {/* APEX */}
                   <td style={{ color: "var(--text-muted)" }}>
                     {s.apex_number ?? "—"}
+                  </td>
+
+                  {/* Email */}
+                  <td style={{ color: "var(--text-muted)", fontSize: "12px" }}>
+                    {(s as any).email ?? "—"}
                   </td>
 
                   {/* City / State */}
@@ -573,6 +588,20 @@ export default function SuppliersPage() {
                   />
                 </div>
 
+                {/* DBA Name */}
+                <div style={{ marginBottom: "14px" }}>
+                  <label className="form-label">DBA Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={(form as any).dba_name ?? ""}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, dba_name: e.target.value } as any))
+                    }
+                    placeholder="Doing business as (if different)"
+                  />
+                </div>
+
                 {/* APEX Number */}
                 <div style={{ marginBottom: "14px" }}>
                   <label className="form-label">APEX Number</label>
@@ -585,6 +614,34 @@ export default function SuppliersPage() {
                     }
                     placeholder="e.g. 123456"
                   />
+                </div>
+
+                {/* Email / Phone row */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" }}>
+                  <div>
+                    <label className="form-label">Email Address</label>
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={(form as any).email ?? ""}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, email: e.target.value } as any))
+                      }
+                      placeholder="contact@company.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label">Phone</label>
+                    <input
+                      type="tel"
+                      className="form-input"
+                      value={(form as any).phone ?? ""}
+                      onChange={(e) =>
+                        setForm((p) => ({ ...p, phone: e.target.value } as any))
+                      }
+                      placeholder="(555) 000-0000"
+                    />
+                  </div>
                 </div>
 
                 {/* Street Address */}

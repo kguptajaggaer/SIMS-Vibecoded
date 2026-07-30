@@ -66,6 +66,8 @@ export interface Supplier {
   zip?: string
   country?: string
   website?: string
+  email?: string
+  phone?: string
   status: SupplierStatus
   is_diverse: boolean
   diversity_classifications: string[]

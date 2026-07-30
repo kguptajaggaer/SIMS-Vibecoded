@@ -6,6 +6,16 @@ import { supabase, getUser, formatDate, formatCurrency } from "@/lib/supabase";
 import StatusBadge from "@/components/ui/StatusBadge";
 import type { User, Contract, ContractCycle, ContractCycleStatus } from "@/lib/types";
 
+interface Attachment {
+  id: string;
+  slot_number: number;
+  file_name: string;
+  file_url: string;
+  description?: string;
+  file_size?: number;
+  uploaded_at?: string;
+}
+
 // ─── Workflow maps ────────────────────────────────────────────────────────────
 
 const APPROVE_FLOW: Partial<Record<ContractCycleStatus, ContractCycleStatus>> = {
@@ -59,6 +69,7 @@ export default function SubkContractDetail() {
 
   // Expanded comment rows
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   useEffect(() => {
     setUser(getUser());
@@ -76,6 +87,12 @@ export default function SubkContractDetail() {
       .eq("contract_id", contractId)
       .order("created_at", { ascending: true });
     setCycles(cy || []);
+    const { data: docs } = await supabase
+      .from("contract_documents")
+      .select("*")
+      .eq("contract_id", contractId)
+      .order("slot_number", { ascending: true });
+    setAttachments((docs as Attachment[]) || []);
     setLoading(false);
   }
 
@@ -541,6 +558,38 @@ export default function SubkContractDetail() {
           </div>
         )}
       </div>
+
+      {/* Attachments */}
+      {attachments.length > 0 && (
+        <div className="card" style={{ marginTop: 16 }}>
+          <div className="card-header">
+            <h2 className="card-title">Documents & Attachments ({attachments.length})</h2>
+          </div>
+          <div className="card-body">
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {attachments.map((doc) => (
+                <div key={doc.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 12px", border: "1px solid var(--border)", borderRadius: 6, background: "#fafbfc" }}>
+                  <div style={{ fontSize: 20, lineHeight: 1 }}>📎</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>
+                      {doc.description || doc.file_name}
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                      {doc.file_name}
+                      {doc.file_size && <> · {(doc.file_size / 1024).toFixed(1)} KB</>}
+                    </div>
+                  </div>
+                  {doc.file_url && (
+                    <a href={doc.file_url} target="_blank" rel="noreferrer" className="btn btn-outline btn-sm" style={{ whiteSpace: "nowrap" }}>
+                      Download
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Approve / Return modal */}
       {reviewTarget && (
